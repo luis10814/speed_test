@@ -1,6 +1,14 @@
 import subprocess
 import re
 from datetime import datetime, timezone
+import psycopg2
+from read_config import get_database_config
+
+database_config = get_database_config("../config/config.txt")
+connect_string = 'dbname={} user={} host={} password={}'.format(database_config['database'],
+                                                                database_config['username'],
+                                                                database_config['hostname'],
+                                                                database_config['password'])
 
 
 #run and store speed test results
@@ -18,11 +26,15 @@ dwn = re.search('Download:   (.+?) Mbps', str_out)
 dwn = dwn.group(1)
 up = re.search('Upload:   (.+?) Mbps', str_out)
 up = up.group(1)
-
 date = datetime.now(timezone.utc)
 
-print(srvr)
-print(lat)
-print(dwn)
-print(up)
-print(date)
+
+#query = "INSERT INTO public.speed_tests VALUES(%s, %s, %s, %s, %s)", (str(date), srvr, lat, dwn, up)
+try:
+    conn = psycopg2.connect(connect_string)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO public.speed_tests VALUES(%s, %s, %s, %s, %s)", (date, srvr, lat, dwn, up))
+    conn.commit()
+
+except (Exception) as error:
+    print(error)
