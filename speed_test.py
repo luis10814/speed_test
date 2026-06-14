@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import psycopg2
 from read_config import get_database_config
 
+# Set up database connection
 database_config = get_database_config("../config/config.txt")
 connect_string = 'dbname={} user={} host={} password={}'.format(database_config['database'],
                                                                 database_config['username'],
@@ -29,7 +30,6 @@ up = up.group(1)
 date = datetime.now(timezone.utc)
 
 
-#query = "INSERT INTO public.speed_tests VALUES(%s, %s, %s, %s, %s)", (str(date), srvr, lat, dwn, up)
 try:
     conn = psycopg2.connect(connect_string)
     cursor = conn.cursor()
